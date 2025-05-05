@@ -2,11 +2,8 @@ from PIL import Image
 import numpy as np
 from matplotlib import pyplot as plt
 from skimage import exposure
-from scipy.signal import convolve2d
+from scipy.signal import convolve2d, fftconvolve
 from scipy.ndimage import median_filter, minimum_filter, maximum_filter, uniform_filter, gaussian_filter, convolve
-from skimage.filters import rank
-from skimage.morphology import footprint_rectangle
-from skimage.util import img_as_ubyte
 
 def zadanie_5():
     # Wczytywanie obrazu
@@ -487,7 +484,7 @@ def zadanie_11():
     elif wybor == 'b':
         # Laplasjan
         laplacian_mask = np.array([[0, -1, 0],
-                                   [-1, 4, -1],
+                                   [-1, 4,-1],
                                    [0, -1, 0]])
         laplacian = convolve(img_np, laplacian_mask)
         sharpened = img_np + laplacian
@@ -540,6 +537,101 @@ def zadanie_11():
     else:
         print("Nieprawidłowy wybór.")
 
+def zadanie_12():
+    print("\n===== ZADANIE 12: Wieloetapowa poprawa obrazu =====")
+    nazwa_pliku = "bonescan.tif"
+
+    try:
+        img = Image.open(nazwa_pliku).convert('L')
+        img_np = np.array(img).astype(np.float32)
+    except FileNotFoundError:
+        print("Błąd: Nie znaleziono pliku.")
+        return
+
+    # 1) Laplasjan i wyostrzenie
+    laplacian_mask = np.array([[0, -1, 0],
+                               [-1, 4, -1],
+                               [0, -1, 0]], dtype=np.float32)
+    laplacian = convolve2d(img_np, laplacian_mask, mode="same", boundary="symm")
+    sharpened = img_np + laplacian
+    sharpened = np.clip(sharpened, 0, 255)
+
+    # 2) Gradient Sobela
+    sobel_x = np.array([[-1, 0, 1],
+                        [-2, 0, 2],
+                        [-1, 0, 1]], dtype=np.float32)
+    sobel_y = np.array([[-1, -2, -1],
+                        [ 0,  0,  0],
+                        [ 1,  2,  1]], dtype=np.float32)
+
+    gx = convolve2d(img_np, sobel_x, mode="same", boundary="symm")
+    gy = convolve2d(img_np, sobel_y, mode="same", boundary="symm")
+    magnitude = np.hypot(gx, gy)
+    magnitude = magnitude / np.max(magnitude) * 255
+
+    # 3) Filtr uśredniający
+    avg_mask = np.ones((5, 5), dtype=np.float32) /25
+    wynik = fftconvolve(magnitude, avg_mask, mode='same')
+
+    # 4) Iloczyn  lapl. i uśredn.
+    product = np.multiply(wynik, laplacian)
+    product = np.clip(product, 0, 255)
+
+    # 5) Suma oryginalnego i 4
+    final_sum = img_np + product
+    final_sum = np.clip(final_sum, 0, 255)
+
+    # 6) Korekcja gamma
+    c = 1.0
+    gamma = 0.5
+    transformed = c * (final_sum / 255.0) ** gamma
+    transformed = np.clip(transformed * 255, 0, 255)
+
+    plt.figure(figsize=(15, 15))  # Zwiększony rozmiar dla lepszej czytelności
+
+    plt.subplot(4, 2, 1)
+    plt.imshow(img_np, cmap='gray')
+    plt.title("1. Oryginalny obraz")
+    plt.axis('off')
+
+    plt.subplot(4, 2, 2)
+    plt.imshow(laplacian, cmap='gray')
+    plt.title("2. Laplasjan")
+    plt.axis('off')
+
+    plt.subplot(4, 2, 3)
+    plt.imshow(sharpened, cmap='gray')
+    plt.title("3. Obraz wyostrzony (oryg. + laplasjan)")
+    plt.axis('off')
+
+    plt.subplot(4, 2, 4)
+    plt.imshow(magnitude, cmap='gray')
+    plt.title("4. Gradient Sobela")
+    plt.axis('off')
+
+    plt.subplot(4, 2, 5)
+    plt.imshow(wynik, cmap='gray')
+    plt.title("5. Filtracja uśredniająca gradientu")
+    plt.axis('off')
+
+    plt.subplot(4, 2, 6)
+    plt.imshow(product, cmap='gray')
+    plt.title("6. Iloczyn (laplasjan × uśredniony gradient)")
+    plt.axis('off')
+
+    plt.subplot(4, 2, 7)
+    plt.imshow(final_sum, cmap='gray')
+    plt.title("7. Suma (oryg. + iloczyn z kroku 6)")
+    plt.axis('off')
+
+    plt.subplot(4, 2, 8)
+    plt.imshow(transformed, cmap='gray')
+    plt.title("8. Transformacja potęgowa (gamma=0.5)")
+    plt.axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
 def menu():
     while True:
         print("\n===== MENU GŁÓWNE =====")
@@ -551,6 +643,7 @@ def menu():
         print("9 - Zadanie: filtracja dolnoprzepustowa (sól i pieprz)")
         print("10 - Zadanie: filtry dolnoprzepustowe (uśredniający i Gaussa)")
         print("11 - Zadanie: filtracja górnoprzepustowa (krawędzie, wyostrzanie)")
+        print("12 - Zadanie: Wieloetapowe podejście do poprawy jakości")
         print("0 - Wyjście z programu")
         wybor = input("Twój wybór: ")
 
@@ -568,6 +661,8 @@ def menu():
             zadanie_10()
         elif wybor == "11":
             zadanie_11()
+        elif wybor == "12":
+            zadanie_12()
         elif wybor == "0":
             print("Zamykanie programu...")
             break
