@@ -34,7 +34,7 @@ def zadanie_5():
     plt.subplot(2, 1, 1)
     plt.imshow(d, cmap='gray')
     plt.title("Wczytany obraz")
-    plt.axis('off')
+    # plt.axis('off')
 
     plt.subplot(2, 1, 2)
     plt.plot(x, greyness, color='black')
@@ -49,7 +49,7 @@ def zadanie_5():
     plt.tight_layout()
     plt.show()
 
-    czy_wyswietlic = input("Czy zapisac wycinek? 1 -> TAK, 0-> NIE")
+    czy_wyswietlic = input("Czy zapisac wycinek? 1 -> TAK, 0-> NIE\n")
     if czy_wyswietlic == '1':
         # Wyświetlenie zakresów
         print(f"\nRozmiar obrazu: szerokość = {d.shape[1]}, wysokość = {d.shape[0]}")
@@ -125,13 +125,13 @@ def zadanie_6():
         return
 
     # Wyświetlenie wyników
-    plt.figure(figsize=(12, 5))
-    plt.subplot(1, 2, 1)
+    plt.figure(figsize=(24, 15))
+    plt.subplot(2, 2, 1)
     plt.imshow(img_np, cmap='gray')
     plt.title("Oryginalny obraz")
     plt.axis('off')
 
-    plt.subplot(1, 2, 2)
+    plt.subplot(2, 2, 2)
     plt.imshow(transformed, cmap='gray')
     plt.title("Po przekształceniu")
     plt.axis('off')
@@ -143,6 +143,26 @@ def zadanie_6():
         plt.suptitle("Przekształcenie c - Zmiana dynamiki skali szarości (rozciąganie kontrastu) o wartości M = " + str(m) + " E = " + str(e) + "\n pliku " + nazwa_pliku, fontsize=15, y=0.99)
     elif wybor == 'd':
         plt.suptitle("Przekształcenie d - Korekcja gamma o wartości C = " + str(c) + " gamma = " + str(gamma) + " pliku " + nazwa_pliku, fontsize=15, y=0.99)
+
+    wsp = 50
+    x = np.linspace(0, img_np.shape[0] - 1, num=img_np.shape[0])
+    greyness = img_np[:, wsp]
+    plt.subplot(2, 2, 3)
+    plt.plot(x, greyness, color='black')
+    plt.xlabel("Pozycja")
+    plt.ylabel("Poziom jasności")
+    plt.title("Profil przed zmianami")
+    plt.grid(True)
+
+    x = np.linspace(0, transformed.shape[0] - 1, num=transformed.shape[0])
+    greyness = transformed[:, wsp]
+    plt.subplot(2, 2, 4)
+    plt.plot(x, greyness, color='black')
+    plt.xlabel("Pozycja")
+    plt.ylabel("Poziom jasności")
+    plt.title("Profil po zmianach")
+    plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
 def zadanie_7():
@@ -218,7 +238,7 @@ def zadanie_8():
         # Przechodzimy po każdym pikselu (bez ramek, bo są w paddingu)
         for i in range(img_np.shape[0]):
             for j in range(img_np.shape[1]):
-                window = padded_img[i:i + 3, j:j + 3]
+                window = padded_img[i:i + 7, j:j + 7]
 
                 hist, _ = np.histogram(window, bins=256, range=(0, 256))
 
@@ -244,7 +264,7 @@ def zadanie_8():
 
         plt.subplot(1, 3, 3)
         plt.imshow(out_img, cmap='gray')
-        plt.title("Lokalne wyrównanie (3x3)")
+        plt.title("Lokalne wyrównanie (7x7)")
         plt.axis('off')
         plt.tight_layout()
         plt.suptitle("a - Lokalne wyrównywanie histogramu pliku " + nazwa_pliku, fontsize=16, y=0.975)
@@ -267,8 +287,8 @@ def zadanie_8():
         sigmaG = np.std(img_norm)
 
         # Średnia i wariancja w oknie 3x3
-        mSxy = uniform_filter(img_norm, size=3)
-        sigmaSxy = np.sqrt(uniform_filter(img_norm ** 2, size=3) - mSxy ** 2)
+        mSxy = uniform_filter(img_norm, size=5)
+        sigmaSxy = np.sqrt(uniform_filter(img_norm ** 2, size=5) - mSxy ** 2)
 
         # Tworzenie maski spełniającej warunki
         mask = (
@@ -328,18 +348,39 @@ def zadanie_9():
         wynik = convolve2d(img_np, mask, mode='same', boundary='symm')
         title = "Filtr średniej (splot)"
 
-        plt.figure(figsize=(10, 7))
-        plt.subplot(1, 2, 1)
+        plt.figure(figsize=(20, 14))
+        plt.subplot(2, 2, 1)
         plt.imshow(img_np, cmap='gray')
         plt.title("Oryginalny obraz")
         plt.axis('off')
 
-        plt.subplot(1, 2, 2)
+        plt.subplot(2, 2, 2)
         plt.imshow(wynik, cmap='gray')
         plt.title(title)
         plt.axis('off')
         plt.tight_layout()
-        plt.suptitle("A - Filtr średniej (splot z maską) dla maski o rozmiarze " + str(size) + "x" + str(size) + " pliku " + nazwa_pliku, fontsize=16, y=0.95)
+        plt.suptitle("A - Filtr średniej (splot z maską) dla maski o rozmiarze " + str(size) + "x" + str(size) + " pliku " + nazwa_pliku, fontsize=16, y=0.985)
+
+        wsp = 50
+        x = np.linspace(0, img_np.shape[0] - 1, num=img_np.shape[0])
+        greyness = img_np[:, wsp]
+        plt.subplot(2, 2, 3)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil przed zmianami")
+        plt.grid(True)
+
+        x = np.linspace(0, wynik.shape[0] - 1, num=wynik.shape[0])
+        greyness = wynik[:, wsp]
+        plt.subplot(2, 2, 4)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil po zmianach")
+        plt.grid(True)
+        plt.tight_layout()
+
         plt.show()
 
     elif wybor == 'b':
@@ -347,40 +388,89 @@ def zadanie_9():
         title = "Filtr medianowy"
 
         plt.figure(figsize=(10, 7))
-        plt.subplot(1, 2, 1)
+        plt.subplot(2, 2, 1)
         plt.imshow(img_np, cmap='gray')
         plt.title("Oryginalny obraz")
         plt.axis('off')
 
-        plt.subplot(1, 2, 2)
+        plt.subplot(2, 2, 2)
         plt.imshow(wynik, cmap='gray')
         plt.title(title)
         plt.axis('off')
         plt.tight_layout()
         plt.suptitle("B - Filtr medianowy dla maski o rozmiarze " + str(size) + "x" + str(size) + " pliku " + nazwa_pliku, fontsize=16, y=0.95)
+
+        wsp = 50
+        x = np.linspace(0, img_np.shape[0] - 1, num=img_np.shape[0])
+        greyness = img_np[:, wsp]
+        plt.subplot(2, 2, 3)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil przed zmianami")
+        plt.grid(True)
+
+        x = np.linspace(0, wynik.shape[0] - 1, num=wynik.shape[0])
+        greyness = wynik[:, wsp]
+        plt.subplot(2, 2, 4)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil po zmianach")
+        plt.grid(True)
+        plt.tight_layout()
+
         plt.show()
 
     elif wybor == 'c':
         wynik_min = minimum_filter(img_np, size=size)
         wynik_max = maximum_filter(img_np, size=size)
 
-        plt.figure(figsize=(15, 7))
-        plt.subplot(1, 3, 1)
+        plt.figure(figsize=(15, 9))
+        plt.subplot(2, 3, 1)
         plt.imshow(img_np, cmap='gray')
         plt.title("Oryginalny obraz")
         plt.axis('off')
 
-        plt.subplot(1, 3, 2)
+        plt.subplot(2, 3, 2)
         plt.imshow(wynik_min, cmap='gray')
         plt.title("Filtr minimum (usuwa sól)")
         plt.axis('off')
 
-        plt.subplot(1, 3, 3)
+        plt.subplot(2, 3, 3)
         plt.imshow(wynik_max, cmap='gray')
         plt.title("Filtr maksimum (usuwa pieprz)")
         plt.axis('off')
 
-        plt.tight_layout()
+        wsp = 50
+        x = np.linspace(0, img_np.shape[0] - 1, num=img_np.shape[0])
+        greyness = img_np[:, wsp]
+        plt.subplot(2, 3, 4)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil przed zmianami")
+        plt.grid(True)
+
+        x = np.linspace(0, wynik_min.shape[0] - 1, num=wynik_min.shape[0])
+        greyness = wynik_min[:, wsp]
+        plt.subplot(2, 3, 5)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil po zmianach")
+        plt.grid(True)
+
+        x = np.linspace(0, wynik_max.shape[0] - 1, num=wynik_max.shape[0])
+        greyness = wynik_max[:, wsp]
+        plt.subplot(2, 3, 6)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil po zmianach")
+        plt.grid(True)
+
+        #plt.tight_layout()
         plt.suptitle("C - Filtr minimum i maksimum dla maski o rozmiarze " + str(size) + "x" + str(size) + " pliku " + nazwa_pliku, fontsize=16, y=0.95)
         plt.show()
 
@@ -420,15 +510,34 @@ def zadanie_10():
 
     # Wyświetlenie
     plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
+    plt.subplot(2, 2, 1)
     plt.imshow(img_np, cmap='gray')
     plt.title("Oryginalny obraz")
     plt.axis('off')
 
-    plt.subplot(1, 2, 2)
+    plt.subplot(2, 2, 2)
     plt.imshow(wynik, cmap='gray')
     plt.title(title)
     plt.axis('off')
+
+    wsp = 350
+    x = np.linspace(0, img_np.shape[0] - 1, num=img_np.shape[0])
+    greyness = img_np[:, wsp]
+    plt.subplot(2, 2, 3)
+    plt.plot(x, greyness, color='black')
+    plt.xlabel("Pozycja")
+    plt.ylabel("Poziom jasności")
+    plt.title("Profil przed zmianami")
+    plt.grid(True)
+
+    x = np.linspace(0, wynik.shape[0] - 1, num=wynik.shape[0])
+    greyness = wynik[:, wsp]
+    plt.subplot(2, 2, 4)
+    plt.plot(x, greyness, color='black')
+    plt.xlabel("Pozycja")
+    plt.ylabel("Poziom jasności")
+    plt.title("Profil po zmianach")
+    plt.grid(True)
 
     plt.tight_layout()
     plt.show()
@@ -468,16 +577,35 @@ def zadanie_11():
         magnitude = np.hypot(gx, gy)
         magnitude = magnitude / np.max(magnitude) * 255
 
-        plt.figure(figsize=(10, 7))
-        plt.subplot(1, 2, 1)
+        plt.figure(figsize=(15, 10))
+        plt.subplot(2, 2, 1)
         plt.imshow(img_np, cmap='gray')
         plt.title("Oryginalny obraz")
         plt.axis('off')
 
-        plt.subplot(1, 2, 2)
+        plt.subplot(2, 2, 2)
         plt.imshow(magnitude, cmap='gray')
         plt.title("Filtr Sobela – wykryte krawędzie")
         plt.axis('off')
+
+        wsp = 50
+        x = np.linspace(0, img_np.shape[0] - 1, num=img_np.shape[0])
+        greyness = img_np[:, wsp]
+        plt.subplot(2, 2, 3)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil przed zmianami")
+        plt.grid(True)
+
+        x = np.linspace(0, magnitude.shape[0] - 1, num=magnitude.shape[0])
+        greyness = magnitude[:, wsp]
+        plt.subplot(2, 2, 4)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil po zmianach")
+        plt.grid(True)
         plt.tight_layout()
         plt.show()
 
@@ -491,20 +619,48 @@ def zadanie_11():
         sharpened = np.clip(sharpened, 0, 255)
 
         plt.figure(figsize=(15, 7))
-        plt.subplot(1, 3, 1)
+        plt.subplot(2, 3, 1)
         plt.imshow(img_np, cmap='gray')
         plt.title("Oryginalny obraz")
         plt.axis('off')
 
-        plt.subplot(1, 3, 2)
+        plt.subplot(2, 3, 2)
         plt.imshow(laplacian, cmap='gray')
         plt.title("Laplasjan")
         plt.axis('off')
 
-        plt.subplot(1, 3, 3)
+        plt.subplot(2, 3, 3)
         plt.imshow(sharpened, cmap='gray')
         plt.title("Po filtrze Laplasjana")
         plt.axis('off')
+
+        wsp = 450
+        x = np.linspace(0, img_np.shape[0] - 1, num=img_np.shape[0])
+        greyness = img_np[:, wsp]
+        plt.subplot(2, 3, 4)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil przed zmianami")
+        plt.grid(True)
+
+        x = np.linspace(0, laplacian.shape[0] - 1, num=laplacian.shape[0])
+        greyness = laplacian[:, wsp]
+        plt.subplot(2, 3, 5)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil po zmianach")
+        plt.grid(True)
+
+        x = np.linspace(0, sharpened.shape[0] - 1, num=sharpened.shape[0])
+        greyness = sharpened[:, wsp]
+        plt.subplot(2, 3, 6)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil po zmianach")
+        plt.grid(True)
         plt.tight_layout()
         plt.show()
 
@@ -519,18 +675,37 @@ def zadanie_11():
         highboost = np.clip(highboost, 0, 255)
 
         plt.figure(figsize=(10, 7))
-        plt.subplot(1, 2, 1)
+        plt.subplot(2, 2, 1)
         plt.imshow(img_np, cmap='gray')
         plt.title("Oryginalny obraz")
         plt.axis('off')
 
-        plt.subplot(1, 2, 2)
+        plt.subplot(2, 2, 2)
         plt.imshow(highboost, cmap='gray')
         if A == 1.0:
             plt.title("Unsharp masking")
         else:
             plt.title(f"High-boost filtering (A={A})")
         plt.axis('off')
+
+        wsp = 350
+        x = np.linspace(0, img_np.shape[0] - 1, num=img_np.shape[0])
+        greyness = img_np[:, wsp]
+        plt.subplot(2, 2, 3)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil przed zmianami")
+        plt.grid(True)
+
+        x = np.linspace(0, highboost.shape[0] - 1, num=highboost.shape[0])
+        greyness = highboost[:, wsp]
+        plt.subplot(2, 2, 4)
+        plt.plot(x, greyness, color='black')
+        plt.xlabel("Pozycja")
+        plt.ylabel("Poziom jasności")
+        plt.title("Profil po zmianach")
+        plt.grid(True)
         plt.tight_layout()
         plt.show()
 
@@ -587,44 +762,44 @@ def zadanie_12():
     transformed = c * (final_sum / 255.0) ** gamma
     transformed = np.clip(transformed * 255, 0, 255)
 
-    plt.figure(figsize=(15, 15))  # Zwiększony rozmiar dla lepszej czytelności
+    plt.figure(figsize=(30, 15))
 
-    plt.subplot(4, 2, 1)
+    plt.subplot(2, 4, 1)
     plt.imshow(img_np, cmap='gray')
     plt.title("1. Oryginalny obraz")
     plt.axis('off')
 
-    plt.subplot(4, 2, 2)
+    plt.subplot(2, 4, 2)
     plt.imshow(laplacian, cmap='gray')
     plt.title("2. Laplasjan")
     plt.axis('off')
 
-    plt.subplot(4, 2, 3)
+    plt.subplot(2, 4, 3)
     plt.imshow(sharpened, cmap='gray')
     plt.title("3. Obraz wyostrzony (oryg. + laplasjan)")
     plt.axis('off')
 
-    plt.subplot(4, 2, 4)
+    plt.subplot(2, 4, 4)
     plt.imshow(magnitude, cmap='gray')
     plt.title("4. Gradient Sobela")
     plt.axis('off')
 
-    plt.subplot(4, 2, 5)
+    plt.subplot(2, 4, 5)
     plt.imshow(wynik, cmap='gray')
     plt.title("5. Filtracja uśredniająca gradientu")
     plt.axis('off')
 
-    plt.subplot(4, 2, 6)
+    plt.subplot(2, 4, 6)
     plt.imshow(product, cmap='gray')
     plt.title("6. Iloczyn (laplasjan × uśredniony gradient)")
     plt.axis('off')
 
-    plt.subplot(4, 2, 7)
+    plt.subplot(2, 4, 7)
     plt.imshow(final_sum, cmap='gray')
     plt.title("7. Suma (oryg. + iloczyn z kroku 6)")
     plt.axis('off')
 
-    plt.subplot(4, 2, 8)
+    plt.subplot(2, 4, 8)
     plt.imshow(transformed, cmap='gray')
     plt.title("8. Transformacja potęgowa (gamma=0.5)")
     plt.axis('off')
